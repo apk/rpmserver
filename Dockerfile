@@ -6,10 +6,12 @@ RUN apk update && \
     apk add git
 RUN CGO_ENABLED=0 go build -o rpmserver
 
-FROM scratch
+FROM centos:centos7
 MAINTAINER Andreas Krey <a.krey@gmx.de>
 
 WORKDIR /data
+
+RUN yum install -y createrepo
 
 COPY --from=binary /app/rpmserver /rpmserver
 
