@@ -115,8 +115,19 @@ func root_handle_func(opts *opts) func (w http.ResponseWriter, r *http.Request) 
 			http.ServeFile(w, r, file)
 
 		} else if r.Method == "PUT" {
+
 			if len(dirs) < 1 {
+				http.Error(w, "files must go inside repos: " + urlpath, 400);
+				return;
+			}
+
+			st, err := os.Stat(phys(dirs[len(dirs)-1]));
+			if os.IsNotExist(err) || (err == nil && !st.IsDir()) {
 				http.Error(w, "won't create new repos by path: " + urlpath, 400);
+				return;
+			} else if err != nil {
+				fmt.Printf("repo stat error:%v\n", err);
+				http.Error(w, "internal error", 400);
 				return;
 			}
 
@@ -127,7 +138,7 @@ func root_handle_func(opts *opts) func (w http.ResponseWriter, r *http.Request) 
 			}
 
 			fparent := dirs[0];
-			err := os.MkdirAll(phys(fparent), 0777);
+			err = os.MkdirAll(phys(fparent), 0777);
 			if err != nil {
 				http.Error(w, "failed to create dir: " + fparent, 400);
 				return;
