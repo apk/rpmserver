@@ -97,8 +97,14 @@ func root_handle_func(opts *opts) func (w http.ResponseWriter, r *http.Request) 
 	}
 
 	return func (w http.ResponseWriter, r *http.Request) {
+		if opts.IpHeader != "" {
+			ff := r.Header.Get(opts.IpHeader)
+			if ff != "" {
+				r.RemoteAddr = ff
+			}
+		}
 
-		fmt.Printf("%s %s \"%s\" \"%s\"\n", timestamp(), r.Method, r.URL.Path, r.UserAgent());
+		fmt.Printf("%s %v %s \"%s\" \"%s\"\n", timestamp(), r.RemoteAddr, r.Method, r.URL.Path, r.UserAgent());
 
 		urlpath := path.Clean(r.URL.Path)
 
