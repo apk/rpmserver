@@ -18,6 +18,7 @@ var addr = flag.String("addr", ":8080", "http service address")
 var docroot = flag.String("path", ".", "http root directory")
 var urlprefix = flag.String("prefix", "/rpm", "URL repository directory")
 var iphead = flag.String("ip", "", "header for remote IP")
+var metagen = flag.String("metagen", "createrepo", "tool to call for metadata update")
 
 type opts struct {
 	UrlPrefix string
@@ -45,7 +46,7 @@ func main() {
 						for k, _ := range dirs {
 							// fmt.Printf("-- notify: '%v'\n", k);
 							fmt.Printf("-- metadata run in: %v\n", k);
-							cmd := exec.Command("createrepo", k);
+							cmd := exec.Command(*metagen, k);
 							cmd.Stdout = os.Stdout;
 							cmd.Stderr = os.Stderr;
 							err := cmd.Run ();
