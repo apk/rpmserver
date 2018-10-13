@@ -28,6 +28,15 @@ type opts struct {
 
 var notifier = make(chan string, 64);
 
+func timestamp() string {
+	t := time.Now()
+	yy, mn, dy := t.Date()
+	hh, mm, ss := t.Clock()
+	return fmt.Sprintf(
+		"%04d%02d%02d-%02d:%02d:%02d",
+		yy, mn, dy, hh, mm, ss);
+}
+
 func main() {
 	go func () {
 		for {
@@ -89,7 +98,7 @@ func root_handle_func(opts *opts) func (w http.ResponseWriter, r *http.Request) 
 
 	return func (w http.ResponseWriter, r *http.Request) {
 
-		fmt.Printf("%s: '%s'\n", r.Method, r.URL.Path);
+		fmt.Printf("%s %s \"%s\" \"%s\"\n", timestamp(), r.Method, r.URL.Path, r.UserAgent());
 
 		urlpath := path.Clean(r.URL.Path)
 
