@@ -49,25 +49,30 @@ func timestamp() string {
 }
 
 func main() {
+	flag.Parse()
+
 	go func () {
 		for {
 
 			dirs := make(map[string]bool);
-			flag := false;
+			flg := false;
 			for {
 				select {
 				case s := <- notifier:
 					// fmt.Printf("-- got: '%v'\n", s);
 					dirs[s]=true;
-					flag = true;
+					flg = true;
 				default:
 					// fmt.Printf("sleep\n");
-					if (!flag) {
+					if (!flg) {
 						for k, _ := range dirs {
 							// fmt.Printf("-- notify: '%v'\n", k);
 							fmt.Printf("-- metadata run in: %v\n", k);
 							ts := t64();
-							cmd := exec.Command(*metagen, k);
+							h := make([]string, len(flag.Args()), len(flag.Args()) + 1)
+							copy(h, flag.Args())
+							h=append(h, k)
+							cmd := exec.Command(*metagen, h...);
 							cmd.Stdout = os.Stdout;
 							cmd.Stderr = os.Stderr;
 							err := cmd.Run ();
@@ -82,14 +87,13 @@ func main() {
 					}
 					time.Sleep (2 * time.Second);
 					// fmt.Printf("wake\n");
-					flag = false;
+					flg = false;
 				}
 			}
 		}
 	} ();
 
 	mux := http.NewServeMux()
-	flag.Parse()
 	pth, err := filepath.Abs(*docroot)
 	if (err != nil) {
 		fmt.Printf("filepath.Abs(%v): %v\n",*docroot,err)
