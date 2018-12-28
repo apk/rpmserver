@@ -39,6 +39,18 @@ func tdelta(ts uint64) string {
 		(td / 1000000) % 1000);
 }
 
+func tband(ts uint64, bytes uint64) string {
+	td := t64()-ts;
+	b := bytes * 1000;
+	if (td < 1000000) {
+		td = 1000000;
+	}
+	return fmt.Sprintf("%d.%03ds %d kb/s",
+		td / 1000000000,
+		(td / 1000000) % 1000,
+		b / (td / 1000));
+}
+
 func timestamp() string {
 	t := time.Now()
 	yy, mn, dy := t.Date()
@@ -211,7 +223,7 @@ func root_handle_func(opts *opts) func (w http.ResponseWriter, r *http.Request) 
 			if total != r.ContentLength {
 				fmt.Printf("content-length mismatch %d vs. %d\n", total, r.ContentLength);
 			} else {
-				fmt.Printf("total %d (%s)\n", total, tdelta(ts));
+				fmt.Printf("total %d (%s)\n", total, tband(ts, uint64(total)));
 			}
 			err = fo.Close();
 			if err != nil {
