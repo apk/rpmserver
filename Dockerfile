@@ -15,7 +15,7 @@ RUN yum install -y createrepo
 
 COPY --from=binary /app/rpmserver /rpmserver
 
-EXPOSE 4040
+EXPOSE 8080
 
 VOLUME ["/data"]
 CMD ["/rpmserver"]
