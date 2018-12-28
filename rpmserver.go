@@ -28,6 +28,17 @@ type opts struct {
 
 var notifier = make(chan string, 64);
 
+func t64() uint64 {
+	return uint64(time.Now().UnixNano());
+}
+
+func tdelta(ts uint64) string {
+	td := t64()-ts;
+	return fmt.Sprintf("%d.%03ds",
+		td / 1000000000,
+		(td / 1000000) % 1000);
+}
+
 func timestamp() string {
 	t := time.Now()
 	yy, mn, dy := t.Date()
@@ -55,6 +66,7 @@ func main() {
 						for k, _ := range dirs {
 							// fmt.Printf("-- notify: '%v'\n", k);
 							fmt.Printf("-- metadata run in: %v\n", k);
+							ts := t64();
 							cmd := exec.Command(*metagen, k);
 							cmd.Stdout = os.Stdout;
 							cmd.Stderr = os.Stderr;
@@ -62,7 +74,7 @@ func main() {
 							if err != nil {
 								fmt.Printf("-- metadata run: %v\n", err);
 							} else {
-								fmt.Printf("-- metadata run ok\n");
+								fmt.Printf("-- metadata run ok (%s)\n", tdelta(ts));
 							}
 						}
 
@@ -89,7 +101,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(*addr, mux))
 }
 
-var counter uint64 = uint64(time.Now().UnixNano());
+var counter uint64 = t64();
 
 func root_handle_func(opts *opts) func (w http.ResponseWriter, r *http.Request) {
 	phys := func (p string) string {
@@ -164,6 +176,7 @@ func root_handle_func(opts *opts) func (w http.ResponseWriter, r *http.Request) 
 
 			rb := make([]byte, 65536);
 			var total int64;
+			var ts = t64();
 			fo, err := os.Create (tmpfile);
 			if err != nil {
 				http.Error(w, "file create failure: " + err.Error(), 400);
@@ -194,7 +207,7 @@ func root_handle_func(opts *opts) func (w http.ResponseWriter, r *http.Request) 
 			if total != r.ContentLength {
 				fmt.Printf("content-length mismatch %d vs. %d\n", total, r.ContentLength);
 			} else {
-				fmt.Printf("total %d\n", total);
+				fmt.Printf("total %d (%s)\n", total, tdelta(ts));
 			}
 			err = fo.Close();
 			if err != nil {
